@@ -1,0 +1,23 @@
+{
+  "servers": [
+    {
+      "id": "ftxfel7w",
+      "command": "pnpm dev:api",
+      "port": 7011,
+      "subdomain": "app-asset-api",
+      "name": null
+    },
+    {
+      "id": "27zk48y2",
+      "command": "pnpm start:web",
+      "port": 7010,
+      "subdomain": "app-asset"
+    },
+    {
+      "id": "oleb3wfb",
+      "command": "pnpm dev:web",
+      "port": 7010,
+      "subdomain": null
+    }
+  ]
+}
