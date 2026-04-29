@@ -43,10 +43,92 @@ export function getAccessToken(): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// In-memory auth state
+// JWT decode — client-side only, no signature verification
 // ---------------------------------------------------------------------------
 
-let currentSnapshot: AuthSessionResponse = { data: null }
+interface JwtPayload {
+  exp?: number
+  id?: string
+  sub?: string
+  name?: string
+  email?: string
+  /** Singular form — not used by RS Office but kept for compat */
+  role?: string
+  /** RS Office JWT uses an array */
+  roles?: string[]
+  image?: string | null
+  [key: string]: unknown
+}
+
+/**
+ * Decodes a JWT and returns an AuthUser, or null if the token is
+ * malformed or expired. Does NOT verify the signature — that is the
+ * server's responsibility. Used only to extract user fields and check
+ * the expiry time on the client.
+ */
+export function decodeToken(token: string): AuthUser | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+
+    // Base64-url → base64 → JSON
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    )
+    const payload = JSON.parse(json) as JwtPayload
+
+    // Reject expired tokens
+    if (payload.exp !== undefined && payload.exp * 1000 < Date.now()) {
+      return null
+    }
+
+    const id = payload.id ?? payload.sub
+    if (!id || !payload.email) return null
+
+    // RS Office JWT uses `roles[]`; fall back to singular `role` or 'user'
+    const role =
+      (Array.isArray(payload.roles) ? payload.roles[0] : undefined) ??
+      payload.role ??
+      'user'
+
+    return {
+      id: String(id),
+      name: payload.name ?? payload.email,
+      email: payload.email,
+      role,
+      image: payload.image ?? null,
+    }
+  } catch {
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// In-memory auth state
+//
+// Pre-populated synchronously from localStorage when the module first loads
+// on the client. This means `useSession()` already has the user on the very
+// first render after a page refresh — no async gap, no timing races.
+// ---------------------------------------------------------------------------
+
+function loadFromStorage(): AuthSessionResponse {
+  // On the server localStorage doesn't exist — start empty.
+  if (typeof localStorage === 'undefined') return { data: null }
+
+  const token = getAccessToken()
+  if (!token) return { data: null }
+
+  const user = decodeToken(token)
+  if (!user) return { data: null }
+
+  return { data: { user } }
+}
+
+let currentSnapshot: AuthSessionResponse = loadFromStorage()
 
 const listeners = new Set<() => void>()
 
@@ -76,7 +158,8 @@ export function useSession(): AuthSessionResponse {
   return useSyncExternalStore(
     subscribe,
     () => currentSnapshot,
-    () => currentSnapshot,
+    // SSR snapshot: always empty (server has no localStorage)
+    () => ({ data: null }),
   )
 }
 

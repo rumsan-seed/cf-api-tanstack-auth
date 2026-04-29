@@ -1,16 +1,13 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import {
+  clearToken,
   getAccessToken,
-  setUser,
   signOut,
   useSession,
-  clearToken,
 } from '../lib/auth-client'
-import { API_URL } from '../lib/api'
 import { AppShell, IconSidebar } from '../components/layout'
-import type { AuthUser } from '../lib/auth-client'
 
 export const Route = createFileRoute('/_app')({
   component: AppLayout,
@@ -19,13 +16,12 @@ export const Route = createFileRoute('/_app')({
 function AppLayout() {
   const navigate = useNavigate()
   const session = useSession()
-  const [checking, setChecking] = useState(!session.data)
 
   useEffect(() => {
-    if (session.data) {
-      setChecking(false)
-      return
-    }
+    // The in-memory store is pre-populated from localStorage at module load
+    // time (see auth-client.ts → loadFromStorage). If session.data is still
+    // null here it means there is genuinely no valid token — redirect.
+    if (session.data) return
 
     const token = getAccessToken()
     if (!token) {
@@ -33,29 +29,17 @@ function AppLayout() {
       return
     }
 
-    fetch(`${API_URL}/auth/session`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          clearToken()
-          void navigate({ to: '/login', replace: true })
-          return
-        }
-        const { user } = (await res.json()) as { user: AuthUser }
-        setUser(user)
-        setChecking(false)
-      })
-      .catch(() => {
-        clearToken()
-        void navigate({ to: '/login', replace: true })
-      })
+    // Token exists but decodeToken failed (expired / malformed) — clear it.
+    clearToken()
+    void navigate({ to: '/login', replace: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const currentUser = session.data?.user
 
-  if (checking) return null
+  // While the session hasn't been confirmed yet (SSR hydration moment),
+  // render nothing to avoid a flash of unauthenticated content.
+  if (!session.data) return null
 
   return (
     <AppShell
