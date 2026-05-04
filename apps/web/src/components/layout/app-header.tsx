@@ -42,7 +42,7 @@ export function AppHeader({ user, onLogout, left }: AppHeaderProps) {
               <button
                 type="button"
                 className={cn(
-                  'flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-gray-200 transition-opacity hover:opacity-80',
+                  'flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-gray-200 transition-opacity hover:opacity-80',
                 )}
                 title={user.name}
               >
@@ -53,7 +53,7 @@ export function AppHeader({ user, onLogout, left }: AppHeaderProps) {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="flex h-full w-full items-center justify-center bg-gray-900 text-[10px] font-semibold text-white">
+                  <span className="flex h-full w-full items-center justify-center bg-gray-900 text-xs font-semibold text-white">
                     {initials || 'U'}
                   </span>
                 )}
