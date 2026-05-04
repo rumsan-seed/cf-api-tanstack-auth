@@ -9,6 +9,9 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import appCss from '../styles.css?url'
+import { AuthProvider } from '../providers/auth-provider'
+import { colorThemeScript } from '../lib/color-theme-store'
+import { fontScript } from '../lib/font-store'
 
 const queryClient = new QueryClient()
 
@@ -20,6 +23,10 @@ export const Route = createRootRoute({
       { title: 'App' },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
+    scripts: [
+      { children: colorThemeScript },
+      { children: fontScript },
+    ],
   }),
 
   shellComponent: RootDocument,
@@ -34,7 +41,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </QueryClientProvider>
         <TanStackDevtools
           config={{ position: 'bottom-right' }}

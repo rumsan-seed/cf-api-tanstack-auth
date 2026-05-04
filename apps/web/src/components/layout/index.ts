@@ -1,4 +1,6 @@
 export { AppShell } from './app-shell'
+export { AppHeader } from './app-header'
 export { IconSidebar } from './icon-sidebar'
 export type { AppShellProps } from './app-shell'
+export type { AppHeaderProps } from './app-header'
 export type { IconSidebarProps, SidebarNavItem } from './icon-sidebar'

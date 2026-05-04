@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --ip 0.0.0.0 --port 7011",
+    "dev": "wrangler dev --ip 0.0.0.0 --port 6901",
     "deploy": "wrangler deploy",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit"

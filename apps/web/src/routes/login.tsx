@@ -1,9 +1,9 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { saveToken, setUser, getAccessToken } from '../lib/auth-client'
+import { getAccessToken } from '../lib/auth-client'
+import { useAuth } from '../providers/auth-provider'
 import { API_URL } from '../lib/api'
-import type { AuthUser } from '../lib/auth-client'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -89,6 +89,7 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const buttonRef = useRef<HTMLDivElement | null>(null)
   const [error, setError] = useState('')
   const [isSigningIn, setIsSigningIn] = useState(false)
@@ -131,14 +132,9 @@ function LoginPage() {
                 throw new Error(err.error ?? 'Google sign-in failed')
               }
 
-              const { token, user } = (await res.json()) as {
-                token: string
-                user: AuthUser
-              }
+              const { token } = (await res.json()) as { token: string }
 
-              // Persist the app JWT in localStorage and hydrate in-memory state.
-              saveToken(token)
-              setUser(user)
+              login(token)
               navigate({ to: '/home' })
             } catch (e) {
               setError(e instanceof Error ? e.message : 'Google sign-in failed')

@@ -4,6 +4,7 @@ import { logger } from 'hono/logger'
 
 import { getDb } from './lib/db'
 import { authRouter } from './routes/auth'
+import { pluginsRouter } from './routes/plugins'
 import type { HonoEnv } from './types'
 
 const app = new Hono<HonoEnv>()
@@ -15,7 +16,7 @@ app.use('*', logger())
 app.use('*', cors({
   origin: (origin) => origin,
   allowHeaders: ['Content-Type', 'Authorization'],
-  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
 }))
 
@@ -28,6 +29,7 @@ app.use('*', async (c, next) => {
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 app.route('/auth', authRouter)
+app.route('/plugins', pluginsRouter)
 
 // ── Health check ──────────────────────────────────────────────────────────────
 

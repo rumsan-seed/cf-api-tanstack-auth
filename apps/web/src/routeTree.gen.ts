@@ -13,7 +13,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
+import { Route as AppSamplePluginIndexRouteImport } from './routes/_app/sample-plugin/index'
+import { Route as AppAdminPluginsRouteImport } from './routes/_app/admin/plugins'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -34,9 +37,24 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppHomeRoute = AppHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSamplePluginIndexRoute = AppSamplePluginIndexRouteImport.update({
+  id: '/sample-plugin/',
+  path: '/sample-plugin/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminPluginsRoute = AppAdminPluginsRouteImport.update({
+  id: '/admin/plugins',
+  path: '/admin/plugins',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -44,13 +62,19 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/home': typeof AppHomeRoute
+  '/settings': typeof AppSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/plugins': typeof AppAdminPluginsRoute
+  '/sample-plugin/': typeof AppSamplePluginIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/home': typeof AppHomeRoute
+  '/settings': typeof AppSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/plugins': typeof AppAdminPluginsRoute
+  '/sample-plugin': typeof AppSamplePluginIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -58,14 +82,40 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/home': typeof AppHomeRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_app/admin/plugins': typeof AppAdminPluginsRoute
+  '/_app/sample-plugin/': typeof AppSamplePluginIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/home' | '/auth/callback'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/home'
+    | '/settings'
+    | '/auth/callback'
+    | '/admin/plugins'
+    | '/sample-plugin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/home' | '/auth/callback'
-  id: '__root__' | '/' | '/_app' | '/login' | '/_app/home' | '/auth/callback'
+  to:
+    | '/'
+    | '/login'
+    | '/home'
+    | '/settings'
+    | '/auth/callback'
+    | '/admin/plugins'
+    | '/sample-plugin'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/_app/home'
+    | '/_app/settings'
+    | '/auth/callback'
+    | '/_app/admin/plugins'
+    | '/_app/sample-plugin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -105,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/home': {
       id: '/_app/home'
       path: '/home'
@@ -112,15 +169,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHomeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/sample-plugin/': {
+      id: '/_app/sample-plugin/'
+      path: '/sample-plugin'
+      fullPath: '/sample-plugin/'
+      preLoaderRoute: typeof AppSamplePluginIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/plugins': {
+      id: '/_app/admin/plugins'
+      path: '/admin/plugins'
+      fullPath: '/admin/plugins'
+      preLoaderRoute: typeof AppAdminPluginsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppHomeRoute: typeof AppHomeRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppAdminPluginsRoute: typeof AppAdminPluginsRoute
+  AppSamplePluginIndexRoute: typeof AppSamplePluginIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppHomeRoute: AppHomeRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppAdminPluginsRoute: AppAdminPluginsRoute,
+  AppSamplePluginIndexRoute: AppSamplePluginIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

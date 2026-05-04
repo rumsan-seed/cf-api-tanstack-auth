@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from '@tanstack/react-router'
-import { Settings } from 'lucide-react'
+import { Puzzle, Settings } from 'lucide-react'
 import { cn } from '@rs/ui'
 
 export interface SidebarNavItem {
@@ -15,7 +15,6 @@ export interface IconSidebarProps {
   navItems?: SidebarNavItem[]
   /** Avatar URL shown at the bottom */
   avatar?: string
-  onSignOut?: () => void
   /** Footer label rendered vertically */
   footerLabel?: string
   className?: string
@@ -27,25 +26,22 @@ const inactiveClass = 'text-gray-400 hover:text-white'
 function AppLogo(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 40 40"
-      fill="none"
+      id="Layer_1"
+      data-name="Layer 1"
       xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 955.91 940.86"
       aria-hidden="true"
       {...props}
     >
-      <rect width="40" height="40" rx="10" fill="currentColor" opacity="0.15" />
-      <text
-        x="50%"
-        y="50%"
-        dominantBaseline="central"
-        textAnchor="middle"
+      <title>Logo</title>
+      <polygon
         fill="currentColor"
-        fontSize="14"
-        fontWeight="bold"
-        fontFamily="Inter, sans-serif"
-      >
-        AM
-      </text>
+        points="500.65 286.95 585.15 334.8 786.61 221.98 786.61 667.95 395.4 448.88 458 409.76 379.76 354.99 223.28 448.88 872.67 824.43 872.67 81.14 500.65 286.95"
+      />
+      <polygon
+        fill="currentColor"
+        points="506.05 510.84 614.48 448.88 223.28 221.98 223.28 667.95 380.26 582.35 458 636.65 137.21 824.43 137.21 81.14 786.61 448.88 591.01 558.41 506.05 510.84"
+      />
     </svg>
   )
 }
@@ -53,7 +49,6 @@ function AppLogo(props: React.SVGProps<SVGSVGElement>) {
 export function IconSidebar({
   navItems = [],
   avatar,
-  onSignOut,
   footerLabel,
   className,
 }: IconSidebarProps) {
@@ -113,23 +108,33 @@ export function IconSidebar({
       )}
 
       {/* Bottom */}
-      <div className="mt-auto flex flex-col items-center gap-4">
-        <button
-          onClick={onSignOut}
-          className={cn('p-2 rounded-lg transition-colors', inactiveClass)}
-          type="button"
-          title={onSignOut ? 'Sign out' : undefined}
+      <div className="mt-auto flex flex-col items-center gap-3">
+        <Link
+          to="/admin/plugins"
+          className={cn('p-2.5 rounded-xl transition-colors', inactiveClass)}
+          activeProps={{
+            className: cn('p-2.5 rounded-xl transition-colors', activeClass),
+          }}
+          title="Plugins"
         >
-          <Settings size={16} />
-        </button>
+          <Puzzle size={18} />
+        </Link>
+        <Link
+          to="/settings"
+          className={cn('p-2.5 rounded-xl transition-colors', inactiveClass)}
+          activeProps={{
+            className: cn('p-2.5 rounded-xl transition-colors', activeClass),
+          }}
+          title="Settings"
+        >
+          <Settings size={18} />
+        </Link>
         {avatar && (
-          <div className="flex flex-col items-center gap-2">
-            <img
-              src={avatar}
-              alt="user"
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          </div>
+          <img
+            src={avatar}
+            alt="user"
+            className="w-8 h-8 rounded-full object-cover"
+          />
         )}
         {footerLabel && (
           <p

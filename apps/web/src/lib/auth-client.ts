@@ -5,6 +5,7 @@ export interface AuthUser {
   name: string
   email: string
   role: string
+  roles: string[]
   image?: string | null
 }
 
@@ -89,17 +90,19 @@ export function decodeToken(token: string): AuthUser | null {
     const id = payload.id ?? payload.sub
     if (!id || !payload.email) return null
 
-    // RS Office JWT uses `roles[]`; fall back to singular `role` or 'user'
-    const role =
-      (Array.isArray(payload.roles) ? payload.roles[0] : undefined) ??
-      payload.role ??
-      'user'
+    const roles = Array.isArray(payload.roles)
+      ? payload.roles.map(String)
+      : payload.role
+        ? [String(payload.role)]
+        : ['user']
+    const role = roles[0] ?? 'user'
 
     return {
       id: String(id),
       name: payload.name ?? payload.email,
       email: payload.email,
       role,
+      roles,
       image: payload.image ?? null,
     }
   } catch {

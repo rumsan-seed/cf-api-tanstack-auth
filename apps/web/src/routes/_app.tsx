@@ -1,59 +1,49 @@
-import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
-import {
-  clearToken,
-  getAccessToken,
-  signOut,
-  useSession,
-} from '../lib/auth-client'
-import { AppShell, IconSidebar } from '../components/layout'
+import { clearToken, decodeToken, getAccessToken, signOut } from '../lib/auth-client'
+import { useAuth } from '../providers/auth-provider'
+import { AppHeader, AppShell, IconSidebar } from '../components/layout'
+import { usePlugins } from '../lib/use-plugins'
+import { registeredPlugins } from '../plugins/index'
 
 export const Route = createFileRoute('/_app')({
+  beforeLoad: () => {
+    if (typeof window === 'undefined') return
+
+    const token = getAccessToken()
+    if (!token) throw redirect({ to: '/login', replace: true })
+
+    if (!decodeToken(token)) {
+      clearToken()
+      throw redirect({ to: '/login', replace: true })
+    }
+  },
   component: AppLayout,
 })
 
 function AppLayout() {
-  const navigate = useNavigate()
-  const session = useSession()
+  const { user } = useAuth()
+  const activePlugins = usePlugins(registeredPlugins)
+  const navItems = activePlugins.map((p) => p.navItem)
 
-  useEffect(() => {
-    // The in-memory store is pre-populated from localStorage at module load
-    // time (see auth-client.ts → loadFromStorage). If session.data is still
-    // null here it means there is genuinely no valid token — redirect.
-    if (session.data) return
-
-    const token = getAccessToken()
-    if (!token) {
-      void navigate({ to: '/login', replace: true })
-      return
-    }
-
-    // Token exists but decodeToken failed (expired / malformed) — clear it.
-    clearToken()
-    void navigate({ to: '/login', replace: true })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const currentUser = session.data?.user
-
-  // While the session hasn't been confirmed yet (SSR hydration moment),
-  // render nothing to avoid a flash of unauthenticated content.
-  if (!session.data) return null
+  if (!user) return null
 
   return (
     <AppShell
       sidebar={
         <IconSidebar
-          navItems={[]}
-          avatar={currentUser?.image ?? undefined}
-          onSignOut={async () => {
-            await signOut()
-            window.location.assign('/login')
-          }}
+          navItems={navItems}
+          avatar={user.image ?? undefined}
         />
       }
     >
+      <AppHeader
+        user={user}
+        onLogout={async () => {
+          await signOut()
+          window.location.assign('/login')
+        }}
+      />
       <Outlet />
     </AppShell>
   )
