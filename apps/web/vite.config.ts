@@ -42,9 +42,13 @@ async function getAvailablePort(preferredPort: number) {
   }
 }
 
-const config = defineConfig(async ({ command }) => {
+const config = defineConfig(async ({ command, mode }) => {
   const isBuild = command === 'build'
-  const devtoolsEventBusPort = isBuild ? 42069 : await getAvailablePort(42069)
+  const isTest = mode === 'test'
+  const shouldEnableDevtools = !isBuild && !isTest
+  const devtoolsEventBusPort = shouldEnableDevtools
+    ? await getAvailablePort(42069)
+    : 42069
   const plugins = [
     nitro(),
     // this is the plugin that enables path aliases
@@ -56,7 +60,7 @@ const config = defineConfig(async ({ command }) => {
     viteReact(),
   ]
 
-  if (!isBuild) {
+  if (shouldEnableDevtools) {
     plugins.unshift(
       devtools({
         eventBusConfig: {

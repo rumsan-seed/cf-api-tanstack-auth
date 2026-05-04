@@ -10,13 +10,17 @@ interface PluginRegistryRow {
 }
 
 async function fetchPlugins(): Promise<PluginRegistryRow[]> {
-  const token = getAccessToken()
-  const res = await fetch(`${API_URL}/plugins`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-  if (!res.ok) return []
-  const data = (await res.json()) as { plugins: PluginRegistryRow[] }
-  return data.plugins
+  try {
+    const token = getAccessToken()
+    const res = await fetch(`${API_URL}/plugins`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (!res.ok) return []
+    const data = (await res.json()) as { plugins: PluginRegistryRow[] }
+    return data.plugins
+  } catch {
+    return []
+  }
 }
 
 /**

@@ -132,6 +132,7 @@ function loadFromStorage(): AuthSessionResponse {
 }
 
 let currentSnapshot: AuthSessionResponse = loadFromStorage()
+const SERVER_SNAPSHOT: AuthSessionResponse = { data: null }
 
 const listeners = new Set<() => void>()
 
@@ -161,8 +162,8 @@ export function useSession(): AuthSessionResponse {
   return useSyncExternalStore(
     subscribe,
     () => currentSnapshot,
-    // SSR snapshot: always empty (server has no localStorage)
-    () => ({ data: null }),
+    // SSR snapshot: must be stable reference to avoid infinite loop
+    () => SERVER_SNAPSHOT,
   )
 }
 

@@ -1,14 +1,30 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 
 import { getAccessToken } from '../lib/auth-client'
 
 export const Route = createFileRoute('/')({
-  beforeLoad: () => {
-    // Skip redirect on the server — localStorage is not available during SSR.
-    // The client-side _app.tsx useEffect is the single source of auth truth.
-    if (typeof window === 'undefined') return
-    if (!getAccessToken()) throw redirect({ to: '/login' })
-    throw redirect({ to: '/home' })
-  },
-  component: () => null,
+  component: IndexPage,
 })
+
+function IndexPage() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    void navigate({
+      to: getAccessToken() ? '/home' : '/login',
+      replace: true,
+    })
+  }, [navigate])
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f0f0f0] px-6 text-center">
+      <div className="rounded-2xl bg-white px-8 py-6 shadow-sm">
+        <h1 className="text-lg font-black text-[#1a1a1a]">Loading</h1>
+        <p className="mt-2 text-sm text-gray-500">
+          Redirecting...
+        </p>
+      </div>
+    </main>
+  )
+}
